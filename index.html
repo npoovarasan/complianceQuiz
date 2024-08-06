@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T24 Compliance Quiz</title>
+    <style>
+                /* General Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0); /* Light gradient background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        /* Centering the H1 */
+        .header {
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6f61, #d500f9, #00e5ff, #76ff03); /* Colorful gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+            margin: 0;
+        }
+        /* Styling for the quiz container */
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #ffffff; /* White background for content */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .question { margin-bottom: 20px; }
+        .answers { margin-left: 20px; }
+        .answers input { margin-right: 10px; }
+        /* Popup message styling */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+        .popup.show {
+            display: block;
+        }
+        .popup .message {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .popup button {
+            background: linear-gradient(135deg, #4CAF50, #45a049); /* Green gradient button */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .popup button:hover {
+            background: linear-gradient(135deg, #45a049, #4CAF50); /* Inverse gradient on hover */
+        }
+        /* Submit button styling */
+        .quiz-container button {
+            background: linear-gradient(135deg, #2196F3, #21CBF3); /* Blue gradient */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .quiz-container button:hover {
+            background: linear-gradient(135deg, #21CBF3, #2196F3); /* Inverse gradient on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>T24 Compliance Quiz</h1>
+    </div>
+    <div class="quiz-container">
+        <form id="quizForm">
+            <div id="questions"></div>
+            <button type="button" onclick="calculateScore()">Submit</button>
+        </form>
+    </div>
+
+    <div id="popup" class="popup">
+        <div class="message" id="popupMessage"></div>
+        <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+        // JSON data (replace this with the path to your JSON file if hosted separately)
+        const questions = [
+  {
+    "Question": "What does IFRS 9 primarily address?",
+    "Option1": "Revenue recognition",
+    "Option2": "Financial instruments",
+    "Option3": "Leases",
+    "Option4": "Employee benefits",
+    "Answer": "Financial instruments"
+  },
+  {
+    "Question": "Which of these below comes under account information?",
+    "Option1": "Personal identification information only",
+    "Option2": "Transaction data, balance information, and account details",
+    "Option3": "Only transaction data",
+    "Option4": "Only balance information.",
+    "Answer": "Transaction data, balance information, and account details"
+  },
+  {
+    "Question": "What does SCA stand for in the context of payments?",
+    "Option1": "Secure Communication Authorization",
+    "Option2": "Strong Customer Authentication",
+    "Option3": "Simple Credit Authorization",
+    "Option4": "Standard Customer Agreement",
+    "Answer": "Strong Customer Authentication"
+  },
+  {
+    "Question": "Which of the following is an example of something the customer knows in SCA?",
+    "Option1": "A fingerprint",
+    "Option2": "A PIN or password",
+    "Option3": "A smartphone",
+    "Option4": "A physical token.",
+    "Answer": "A PIN or password"
+  },
+  {
+    "Question": "What is the main purpose of SCA?",
+    "Option1": "To simplify the payment process",
+    "Option2": "To reduce fraud and increase the security of electronic payments",
+    "Option3": "To increase transaction fees",
+    "Option4": "To speed up transaction times.",
+    "Answer": "To reduce fraud and increase the security of electronic payments"
+  },
+  {
+    "Question": "What is typically required to make an online payment?",
+    "Option1": "Hard Cash",
+    "Option2": "Debit or credit card details",
+    "Option3": "Physical check",
+    "Option4": "Barter system.",
+    "Answer": "Debit or credit card details"
+  },
+  {
+    "Question": "What should you do if you suspect fraudulent activity on your online payment?",
+    "Option1": "Ignore it",
+    "Option2": "Report it to your bank or payment provider immediately",
+    "Option3": "Post about it on social media",
+    "Option4": "Change your shipping address.",
+    "Answer": "Report it to your bank or payment provider immediately"
+  },
+  {
+    "Question": "What occurs after the user chooses to pay from their bank account?",
+    "Option1": "The payment is processed without any further action",
+    "Option2": "The user is redirected to their bank's website or app to approve the payment",
+    "Option3": "The payment amount is automatically deducted from the account",
+    "Option4": "The payment request is ignored, and no action is taken.",
+    "Answer": "The user is redirected to their bank's website or app to approve the payment"
+  },
+  {
+    "Question": "What happens if an OTP is entered incorrectly for payment confirmation?",
+    "Option1": "The payment is processed as usual",
+    "Option2": "The transaction is completed without OTP verification",
+    "Option3": "The payment attempt is rejected and may require re-try",
+    "Option4": "The payment is automatically refunded.",
+    "Answer": "The payment attempt is rejected and may require re-try"
+  },
+  {
+    "Question": "What happens once payment is confirmed successfully?",
+    "Option1": "The transaction is canceled",
+    "Option2": "The payment is refunded",
+    "Option3": "The payment details are recorded, and the transaction is completed",
+    "Option4": "The payment request is re-processed.",
+    "Answer": "The payment details are recorded, and the transaction is completed"
+  },
+  {
+    "Question": "Which of the following is a common method of tax evasion?",
+    "Option1": "Claiming all eligible deductions",
+    "Option2": "Underreporting income",
+    "Option3": "Filing taxes on time",
+    "Option4": "Investing in tax-advantaged accounts.",
+    "Answer": "Underreporting income"
+  },
+  {
+    "Question": "What is the difference between tax evasion and tax avoidance?",
+    "Option1": "Tax evasion is legal; tax avoidance is illegal",
+    "Option2": "Tax evasion is illegal; tax avoidance is legal",
+    "Option3": "Tax evasion involves offshore accounts; tax avoidance does not",
+    "Option4": "There is no difference.",
+    "Answer": "Tax evasion is illegal; tax avoidance is legal"
+  },
+  {
+    "Question": "What is a potential consequence of being found guilty of tax evasion?",
+    "Option1": "A thank-you note from the IRS",
+    "Option2": "Criminal charges, including fines and imprisonment",
+    "Option3": "An award for financial management",
+    "Option4": "A reduced tax bill",
+    "Answer": "Criminal charges, including fines and imprisonment"
+  },
+  {
+    "Question": "What is the primary purpose of data protection laws?",
+    "Option1": "To promote the sharing of personal data",
+    "Option2": "To safeguard personal data from unauthorized access and misuse",
+    "Option3": "To increase marketing opportunities",
+    "Option4": "To standardize business operations.",
+    "Answer": "To safeguard personal data from unauthorized access and misuse"
+  },
+  {
+    "Question": "Which of the following is considered personal data?",
+    "Option1": "Your data stored on a computer",
+    "Option2": "Data related to you as a living individual",
+    "Option3": "Company financial statements",
+    "Option4": "Your data collected by a government agency.",
+    "Answer": "Data related to you as a living individual"
+  },
+  {
+    "Question": "Which of the following is considered Sensitive data?",
+    "Option1": "Name",
+    "Option2": "Phone number.",
+    "Option3": "Biometric Data.",
+    "Option4": "Email address.",
+    "Answer": "Biometric Data."
+  },
+  {
+    "Question": "What is one effective way for a bank to prevent credit losses on loans and investments?",
+    "Option1": "By offering loans to everyone",
+    "Option2": "By checking if borrowers can repay",
+    "Option3": "By ignoring borrower credit history",
+    "Option4": "By setting low interest rates on all loans.",
+    "Answer": "By checking if borrowers can repay"
+  },
+  {
+    "Question": "What is included in a financial statement?",
+    "Option1": "Only the company's revenue and expenses",
+    "Option2": "The company's assets, liabilities, equity, revenue, and expenses",
+    "Option3": "Only the company's cash flow",
+    "Option4": "The company's marketing strategy.",
+    "Answer": "The company's assets, liabilities, equity, revenue, and expenses"
+  },
+  {
+    "Question": "What does the acronym IFRS stand for?",
+    "Option1": "International Financial Reporting Standard",
+    "Option2": "International Financial Reporting System",
+    "Option3": "International Financial Risk Standard",
+    "Option4": "International Finance Reporting Standard",
+    "Answer": "International Financial Reporting Standard"
+  },
+  {
+    "Question": "What does Regulation compliance deal with?",
+    "Option1": "Marketing strategies for the company",
+    "Option2": "Adherence to laws, regulations, and guidelines",
+    "Option3": "Product development and design",
+    "Option4": "Employee performance reviews",
+    "Answer": "Adherence to laws, regulations, and guidelines"
+  }
+];
+
+        // Function to get 5 random questions
+        function getRandomQuestions() {
+            let shuffled = questions.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        // Function to display questions
+        function displayQuestions() {
+            const questionsDiv = document.getElementById('questions');
+            questionsDiv.innerHTML = '';
+            const randomQuestions = getRandomQuestions();
+            randomQuestions.forEach((q, index) => {
+                let optionsHtml = [q.Option1, q.Option2, q.Option3, q.Option4].map(option => `
+                    <input type="radio" name="q${index}" value="${option}" required> ${option}
+                `).join('<br>');
+                
+                questionsDiv.innerHTML += `
+                    <div class="question">
+                        <p>${q.Question}</p>
+                        <div class="answers">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Function to calculate score and show popup
+        function calculateScore() {
+            const correctAnswers = questions.slice(0, 5).map(q => q.Answer);
+            let score = 0;
+
+            correctAnswers.forEach((correctAnswer, index) => {
+                const selectedAnswer = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedAnswer && selectedAnswer.value === correctAnswer) {
+                    score++;
+                }
+            });
+
+            const message = score === 5 ? 'Congratulations! You scored 100%! 🎉' : `Your score is ${score}/5`;
+            showPopup(message);
+        }
+
+        // Function to show popup
+        function showPopup(message) {
+            document.getElementById('popupMessage').innerText = message;
+            document.getElementById('popup').classList.add('show');
+        }
+
+        // Function to close popup
+        function closePopup() {
+            document.getElementById('popup').classList.remove('show');
+        }
+
+        // Load questions on page load
+        window.onload = displayQuestions;
+    </script>
+</body>
+</html>
